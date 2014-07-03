@@ -1,0 +1,3 @@
+[submodule "bin/begreen"]
+	path = bin/begreen
+	url = /home/ikegam/study/buildshell/submodule_real/begreen
