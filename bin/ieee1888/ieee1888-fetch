@@ -1,0 +1,37 @@
+#!/usr/bin/ruby
+
+$LOAD_PATH.unshift "./lib/IEEE1888Client/"
+
+STDOUT.sync = true
+
+require "IEEE1888Client.rb"
+require 'optparse'
+require 'time'
+
+params = ARGV.getopts('U:p:f:t:')
+
+params["U"] ||= "http://fiap-sandbox.gutp.ic.i.u-tokyo.ac.jp/axis2/services/FIAPStorage"
+params["p"] ||= "http://azbil.com/sentinel/WEMS/Env10/current"
+
+unless params["f"] or params["t"] then
+  @single = true
+end
+
+client = IEEE1888Client.new(params["U"])
+
+if @single
+  value = client.get_recent_one(params["p"])
+  exit -1 if value == nil
+  puts "#{value.xmlattr_time.to_s},#{params["p"]},#{value}"
+  exit 0
+end
+
+from=(params["f"] != nil ? Time.parse(params["f"]) : nil)
+to=(params["t"] != nil ? Time.parse(params["t"]) : nil)
+
+values = client.get_time_series(params["p"], from, to)
+
+values.each{|value|
+  puts "#{value.xmlattr_time.to_s}\t#{params["p"]}\t#{value}"
+}
+

@@ -1,0 +1,22 @@
+#!/usr/bin/ruby
+
+$LOAD_PATH.unshift "./lib/IEEE1888Client/"
+STDOUT.sync = true
+
+require "IEEE1888Client.rb"
+require 'optparse'
+require 'time'
+
+params = ARGV.getopts('U:')
+
+params["U"] ||= "http://fiap-sandbox.gutp.ic.i.u-tokyo.ac.jp/axis2/services/FIAPStorage"
+#params["p"] ||= "http://ikegam.hongo.wide.ad.jp/gw/sentinel/WEMS/Env10/current"
+
+client = IEEE1888Client.new(params["U"])
+
+STDIN.each_line{|line|
+  column = line.chomp.split(/\t/)
+  column[2] = column[2..-1].join('\t').strip
+  time = Time.parse(column[0])
+  client.write(column[2], time, column[1])
+}
